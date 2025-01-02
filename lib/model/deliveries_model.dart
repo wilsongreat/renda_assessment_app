@@ -1,24 +1,9 @@
 class DeliveryListData {
   List<DeliveryResponseModel>? deliveries;
 
-  DeliveryListData({this.deliveries});
+  DeliveryListData(this.deliveries);
 
-  DeliveryListData.fromJson(Map<String, dynamic> json) {
-    if (json['deliveries'] != null) {
-      deliveries = <DeliveryResponseModel>[];
-      json['deliveries'].forEach((v) {
-        deliveries!.add(DeliveryResponseModel.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (this.deliveries != null) {
-      data['deliveries'] = this.deliveries!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
+  
 }
 
 class DeliveryResponseModel {
@@ -128,39 +113,38 @@ class DeliveryResponseModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = this.id;
-    data['business_id'] = this.businessId;
-    data['business_name'] = this.businessName;
-    data['country'] = this.country;
-    data['delivery_id'] = this.deliveryId;
-    data['batch_id'] = this.batchId;
-    data['shipment_id'] = this.shipmentId;
-    data['driver_id'] = this.driverId;
-    data['status'] = this.status;
-    data['pick_up_address'] = this.pickUpAddress;
-    data['delivery_address'] = this.deliveryAddress;
-    data['pick_up_area'] = this.pickUpArea;
-    data['delivery_area'] = this.deliveryArea;
-    data['sender_name'] = this.senderName;
-    data['sender_phone'] = this.senderPhone;
-    data['recipient_name'] = this.recipientName;
-    data['recipient_phone'] = this.recipientPhone;
-    if (this.deliveryItems != null) {
-      data['delivery_items'] =
-          this.deliveryItems!.map((v) => v.toJson()).toList();
+    data['id'] = id;
+    data['business_id'] = businessId;
+    data['business_name'] = businessName;
+    data['country'] = country;
+    data['delivery_id'] = deliveryId;
+    data['batch_id'] = batchId;
+    data['shipment_id'] = shipmentId;
+    data['driver_id'] = driverId;
+    data['status'] = status;
+    data['pick_up_address'] = pickUpAddress;
+    data['delivery_address'] = deliveryAddress;
+    data['pick_up_area'] = pickUpArea;
+    data['delivery_area'] = deliveryArea;
+    data['sender_name'] = senderName;
+    data['sender_phone'] = senderPhone;
+    data['recipient_name'] = recipientName;
+    data['recipient_phone'] = recipientPhone;
+    if (deliveryItems != null) {
+      data['delivery_items'] = deliveryItems!.map((v) => v.toJson()).toList();
     }
-    data['total_items_cost'] = this.totalItemsCost;
-    data['total_item_weight'] = this.totalItemWeight;
-    data['delivery_cost'] = this.deliveryCost;
-    data['payment_type'] = this.paymentType;
-    data['schedule_delivery'] = this.scheduleDelivery?.toIso8601String();
-    data['tracking_id'] = this.trackingId;
-    data['payment_method'] = this.paymentMethod;
-    data['cash_collected'] = this.cashCollected;
-    data['return_delivery_cost'] = this.returnDeliveryCost;
-    data['partner_payout'] = this.partnerPayout;
-    data['mock_commission'] = this.mockCommission;
-    data['margin'] = this.margin;
+    data['total_items_cost'] = totalItemsCost;
+    data['total_item_weight'] = totalItemWeight;
+    data['delivery_cost'] = deliveryCost;
+    data['payment_type'] = paymentType;
+    data['schedule_delivery'] = scheduleDelivery?.toIso8601String();
+    data['tracking_id'] = trackingId;
+    data['payment_method'] = paymentMethod;
+    data['cash_collected'] = cashCollected;
+    data['return_delivery_cost'] = returnDeliveryCost;
+    data['partner_payout'] = partnerPayout;
+    data['mock_commission'] = mockCommission;
+    data['margin'] = margin;
     return data;
   }
 }
@@ -193,12 +177,12 @@ class DeliveryItem {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['category'] = this.category;
-    data['sub_category'] = this.subCategory;
-    data['item_name'] = this.itemName;
-    data['weight'] = this.weight;
-    data['quantity'] = this.quantity;
-    data['unit_price'] = this.unitPrice;
+    data['category'] = category;
+    data['sub_category'] = subCategory;
+    data['item_name'] = itemName;
+    data['weight'] = weight;
+    data['quantity'] = quantity;
+    data['unit_price'] = unitPrice;
     return data;
   }
 }

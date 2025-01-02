@@ -1,14 +1,108 @@
 import 'dart:convert';
 import 'dart:core';
+import 'dart:io' as io;
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:renda_assessment/model/deliveries_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:http/http.dart' as http;
+import 'package:sqflite/sqflite.dart';
 
 part 'deliveries_view_model.g.dart';
 
 @riverpod
 class DeliveriesViewModel extends _$DeliveriesViewModel {
+  Database? _database;
+
+  String databaseName = 'transaction.db';
+  static const int versionNumber = 1;
+  String tableNotes = 'Users';
+  String colId = 'id';
+  String colDate = 'date';
+  String colDescription = 'description';
+  String colTitle = 'title';
+  String colType = 'type';
+  String colStatus = 'status';
+  String colAmount = 'amount';
+
+  Future<Database> get database async {
+    if (_database != null) {
+      return _database!;
+    }
+    _database = await _initDatabase();
+    return _database!;
+  }
+
+  _initDatabase() async {
+    io.Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    String path = join(documentsDirectory.path, databaseName);
+    var db =
+        await openDatabase(path, version: versionNumber, onCreate: _onCreate);
+    return db;
+  }
+
+  _onCreate(Database db, int intVersion) async {
+    await db.execute("CREATE TABLE IF NOT EXISTS $tableNotes ("
+        "$colId INTEGER PRIMARY KEY,"
+        "$colDate TEXT,"
+        "$colDescription TEXT,"
+        "$colTitle TEXT,"
+        "$colType TEXT,"
+        "$colStatus TEXT,"
+        "$colAmount TEXT"
+        ")");
+  }
+
+  Future<List<DeliveryResponseModel>> getAll() async {
+    final db = await database;
+    final result = await db.query(tableNotes, orderBy: '$colDate DESC');
+    return result.map((json) => DeliveryResponseModel.fromJson(json)).toList();
+  }
+
+  Future<DeliveryResponseModel?> read(int id) async {
+    final db = await database;
+    final maps = await db.query(
+      tableNotes,
+      where: '$colId = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return DeliveryResponseModel.fromJson(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  Future<void> insert(DeliveryResponseModel note) async {
+    final db = await database;
+    await db.insert(tableNotes, note.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<int> codeUpdate(DeliveryResponseModel note) async {
+    final db = await database;
+    var res = await db.update(tableNotes, note.toJson(),
+        where: '$colId = ?', whereArgs: [note.id]);
+    return res;
+  }
+
+  Future<void> delete(int id) async {
+    final db = await database;
+    try {
+      await db.delete(tableNotes, where: "$colId = ?", whereArgs: [id]);
+    } catch (err) {
+      debugPrint("Something went wrong when deleting an item: $err");
+    }
+  }
+
+  Future close() async {
+    final db = await database;
+    db.close();
+  }
+
   @override
   FutureOr<dynamic> build() {
     return state;
@@ -17,32 +111,46 @@ class DeliveriesViewModel extends _$DeliveriesViewModel {
   static const String baseUrl = 'https://run.mocky.io/v3';
   final url = '$baseUrl/f7f73f19-054d-41f7-94bb-c2d3d33524bd';
 
-  List<DeliveryResponseModel>? deliveryList ;
+  List<DeliveryResponseModel> deliveryList = [];
 
-  Future<List<DeliveryResponseModel>?> fetchDeliveries() async {
+  Future<void> fetchDeliveries() async {
     debugPrint(url);
 
     // Show loading state
     state = const AsyncLoading();
 
     // Fetch and parse deliveries
-    state = await AsyncValue.guard(() async {
+
+    try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
-        debugPrint('SUCCESSFUL API CALL: ${response.body.toString()}');
-        final jsonData = await json.decode(response.body.toString());
-        debugPrint('SUCCESSFUL API CALL: $jsonData');
-          final deliveryList = (jsonData).map((delivery) => DeliveryResponseModel.fromJson(delivery));
-          debugPrint(deliveryList.toString());
-          return deliveryList;
+        String rawJson = response.body;
+        // Fix trailing commas in the JSON
+        String fixedJson =
+            rawJson.replaceAllMapped(RegExp(r',\s*[}\]]'), (match) {
+          // Remove the comma
+          return match.group(0)!.replaceFirst(',', '');
+        });
+        List<dynamic> jsonData = json.decode(fixedJson);
+        deliveryList.clear();
+        for (var i = 0; i < jsonData.length; i++) {
+          // deliveryList.add(DeliveryResponseModel.fromJson(jsonData[i]));
+          insert(DeliveryResponseModel.fromJson(jsonData[i]));
+        }
+        deliveryList = await getAll();
       } else {
-        throw Exception('Faileds to load deliveries: ${response.statusCode}');
+        throw Exception('Failed to load data');
       }
-    });
+    } catch (e, s) {
+      debugPrint(e.toString());
+      debugPrint(s.toString());
+    }
+    // state = await AsyncValue.guard(() async {
 
-    return null;
+    // });
+
+    return;
   }
-
 }
 
 // final apiLost = [
