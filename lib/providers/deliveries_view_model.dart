@@ -36,7 +36,7 @@ class DeliveriesViewModel extends _$DeliveriesViewModel {
           debugPrint(deliveryList.toString());
           return deliveryList;
       } else {
-        throw Exception('Failed to load deliveries: ${response.statusCode}');
+        throw Exception('Faileds to load deliveries: ${response.statusCode}');
       }
     });
 
