@@ -28,7 +28,7 @@ class DeliveriesViewModel extends _$DeliveriesViewModel {
       var name =
           element.senderName!.toLowerCase().contains(search.toLowerCase());
       var id = element.id!.toLowerCase().contains(search.toLowerCase());
-      return name || id;
+      return id || name;
     }).toList();
     print(searchList.length);
   }

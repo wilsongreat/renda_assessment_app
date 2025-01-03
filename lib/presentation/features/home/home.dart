@@ -21,7 +21,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  
   @override
   void initState() {
     super.initState();
@@ -154,7 +153,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: ListView.separated(
                 scrollDirection: Axis.vertical,
                 itemBuilder: (_, index) {
-                  final val = provider.deliveryList[index];
+                  final val = provider.searchList[index];
                   // final status =
                   //     locator.get<SharedPrefs>().getList(val.id ?? '');
                   // print(status);
