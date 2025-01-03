@@ -1,108 +1,16 @@
 import 'dart:convert';
 import 'dart:core';
-import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:renda_assessment/model/deliveries_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'deliveries_view_model.g.dart';
 
 @riverpod
 class DeliveriesViewModel extends _$DeliveriesViewModel {
-  Database? _database;
-
-  String databaseName = 'transaction.db';
-  static const int versionNumber = 1;
-  String tableNotes = 'Users';
-  String colId = 'id';
-  String colDate = 'date';
-  String colDescription = 'description';
-  String colTitle = 'title';
-  String colType = 'type';
-  String colStatus = 'status';
-  String colAmount = 'amount';
-
-  Future<Database> get database async {
-    if (_database != null) {
-      return _database!;
-    }
-    _database = await _initDatabase();
-    return _database!;
-  }
-
-  _initDatabase() async {
-    io.Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, databaseName);
-    var db =
-        await openDatabase(path, version: versionNumber, onCreate: _onCreate);
-    return db;
-  }
-
-  _onCreate(Database db, int intVersion) async {
-    await db.execute("CREATE TABLE IF NOT EXISTS $tableNotes ("
-        "$colId INTEGER PRIMARY KEY,"
-        "$colDate TEXT,"
-        "$colDescription TEXT,"
-        "$colTitle TEXT,"
-        "$colType TEXT,"
-        "$colStatus TEXT,"
-        "$colAmount TEXT"
-        ")");
-  }
-
-  Future<List<DeliveryResponseModel>> getAll() async {
-    final db = await database;
-    final result = await db.query(tableNotes, orderBy: '$colDate DESC');
-    return result.map((json) => DeliveryResponseModel.fromJson(json)).toList();
-  }
-
-  Future<DeliveryResponseModel?> read(int id) async {
-    final db = await database;
-    final maps = await db.query(
-      tableNotes,
-      where: '$colId = ?',
-      whereArgs: [id],
-    );
-
-    if (maps.isNotEmpty) {
-      return DeliveryResponseModel.fromJson(maps.first);
-    } else {
-      return null;
-    }
-  }
-
-  Future<void> insert(DeliveryResponseModel note) async {
-    final db = await database;
-    await db.insert(tableNotes, note.toJson(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
-  }
-
-  Future<int> codeUpdate(DeliveryResponseModel note) async {
-    final db = await database;
-    var res = await db.update(tableNotes, note.toJson(),
-        where: '$colId = ?', whereArgs: [note.id]);
-    return res;
-  }
-
-  Future<void> delete(int id) async {
-    final db = await database;
-    try {
-      await db.delete(tableNotes, where: "$colId = ?", whereArgs: [id]);
-    } catch (err) {
-      debugPrint("Something went wrong when deleting an item: $err");
-    }
-  }
-
-  Future close() async {
-    final db = await database;
-    db.close();
-  }
-
   @override
   FutureOr<dynamic> build() {
     return state;
@@ -112,6 +20,18 @@ class DeliveriesViewModel extends _$DeliveriesViewModel {
   final url = '$baseUrl/f7f73f19-054d-41f7-94bb-c2d3d33524bd';
 
   List<DeliveryResponseModel> deliveryList = [];
+
+  List<DeliveryResponseModel> searchList = [];
+
+  Future<void> searchDeliveries(String search) async {
+    searchList = deliveryList.where((element) {
+      var name =
+          element.senderName!.toLowerCase().contains(search.toLowerCase());
+      var id = element.id!.toLowerCase().contains(search.toLowerCase());
+      return name || id;
+    }).toList();
+    print(searchList.length);
+  }
 
   Future<void> fetchDeliveries() async {
     debugPrint(url);
@@ -134,10 +54,19 @@ class DeliveriesViewModel extends _$DeliveriesViewModel {
         List<dynamic> jsonData = json.decode(fixedJson);
         deliveryList.clear();
         for (var i = 0; i < jsonData.length; i++) {
-          // deliveryList.add(DeliveryResponseModel.fromJson(jsonData[i]));
-          insert(DeliveryResponseModel.fromJson(jsonData[i]));
+          deliveryList.add(DeliveryResponseModel.fromJson(jsonData[i]));
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          List<String> val = [];
+          val
+            ..add(deliveryList[i].country!)
+            ..add(deliveryList[i].trackingId!)
+            ..add(deliveryList[i].status!)
+            ..add(deliveryList[i].deliveryCost.toString())
+            ..add(deliveryList[i].driverId!)
+            ..add(deliveryList[i].batchId!);
+          prefs.setStringList(deliveryList[i].id ?? '', val);
         }
-        deliveryList = await getAll();
+        searchList = deliveryList;
       } else {
         throw Exception('Failed to load data');
       }
@@ -150,6 +79,22 @@ class DeliveriesViewModel extends _$DeliveriesViewModel {
     // });
 
     return;
+  }
+
+  Future<void> updateList(String id, String status) async {
+    final val = deliveryList.firstWhere((element) => element.id == id);
+
+    List<String> list = [];
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    list
+      ..add(val.country!)
+      ..add(val.trackingId!)
+      ..add(status)
+      ..add(val.deliveryCost.toString())
+      ..add(val.driverId!)
+      ..add(val.batchId!);
+    prefs.setStringList(val.id ?? '', list);
   }
 }
 
