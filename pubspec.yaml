@@ -49,6 +49,7 @@ dependencies:
   percent_indicator: ^4.2.4
   shared_preferences: ^2.3.5
   get_it: ^8.0.3
+  showcaseview: ^3.0.0
 
 dev_dependencies:
   flutter_test:

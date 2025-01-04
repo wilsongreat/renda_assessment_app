@@ -1,12 +1,12 @@
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:renda_assessment/presentation/components/shared/custom_text.dart';
-import 'package:renda_assessment/presentation/components/shared/gap.dart';
 import 'package:renda_assessment/providers/deliveries_view_model.dart';
 import 'package:renda_assessment/res/app_assets.dart';
 import 'package:renda_assessment/res/constants/app_colors.dart';
+import 'package:renda_assessment/src/components.dart';
 import 'package:renda_assessment/utils/extension.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,6 +23,10 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
   @override
   void initState() {
     fetchDetails();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(deliveriesViewModelProvider.notifier).fetchDeliveries();
+
+    });
     super.initState();
   }
 
@@ -36,43 +40,9 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
   @override
   Widget build(BuildContext context) {
     final provider = ref.read(deliveriesViewModelProvider.notifier);
+    final item = provider.deliveryList.firstWhere((e) => e.id == widget.id);
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const TextView(
-              text: 'Tracking “NB145618X8S”',
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-            ),
-            PopupMenuButton(itemBuilder: (context) {
-              return [
-                PopupMenuItem(
-                  child: const Text('created'),
-                  onTap: () {
-                    provider.updateList(widget.id, 'created').whenComplete(() {
-                      fetchDetails();
-                      print('created');
-                    });
-                  },
-                ),
-                PopupMenuItem(
-                  child: const Text('Delivered'),
-                  onTap: () {
-                    provider
-                        .updateList(widget.id, 'Delivered')
-                        .whenComplete(() {
-                      fetchDetails();
-                      print('created');
-                    });
-                  },
-                ),
-              ];
-            })
-          ],
-        ),
-      ),
+      appBar: appBar(item),
       body: Stack(
         children: [
           Container(
@@ -126,16 +96,16 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
                         controller: controller,
                         shrinkWrap: true,
                         children: [
-                          const Column(
+                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               TextView(
-                                text: 'Your parcel is on the way',
+                                text: _delivers[2]== 'In Transit'? 'Your parcel is on the way':_delivers[2]== 'Accepted'?'Your parcel has been delivered': 'Your parcel is pending delivery',
                                 fontSize: 20,
                                 fontWeight: FontWeight.w600,
                               ),
-                              Gap(20),
-                              TextView(
+                              const Gap(20),
+                              const TextView(
                                 text: 'Your parcel is on the way',
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -161,8 +131,8 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const TextView(
-                                    text: 'Martins Jim',
+                                   TextView(
+                                    text: '${item.senderName}',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -205,12 +175,12 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
                                   subText: 'Express',
                                   icon: AppAssets.deliveryIcon),
                               mainChip(
-                                  mainText: 'Estimate',
-                                  subText: '1 Day',
+                                  mainText: 'Quantity',
+                                  subText: '${item.deliveryItems![0].quantity.toString()}Unit',
                                   icon: AppAssets.estimateIcon),
                               mainChip(
                                   mainText: 'Weight',
-                                  subText: '10Kg',
+                                  subText: '${item.deliveryItems![0].weight.toString()}Kg',
                                   icon: AppAssets.weightIcon),
                             ],
                           ),
@@ -239,8 +209,8 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
                                   trackStep(
                                       color: _delivers.isEmpty
                                           ? AppColors.kBlack
-                                          : _delivers[2] == 'Delivered'
-                                              ? AppColors.kPrimaryBright
+                                          : _delivers[2] == 'Accepted'
+                                              ? AppColors.kPrimaryBright : _delivers[2] == 'In Transit'?AppColors.kDarkOrange
                                               : AppColors.kBlack,
                                       icon: const Icon(
                                         Icons.check,
@@ -262,7 +232,7 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
                                       haveDetails: true,
                                       mainText: 'Pickup Confirmation',
                                       subText: '2km - December | 09:10 AM ',
-                                      picker: 'Skot adams',
+                                      picker: item.recipientName,
                                       length: 100),
                                   trackStep(
                                       color: AppColors.kDarkOrange,
@@ -298,6 +268,55 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
               ),
             ),
           ),
+        ],
+      ).animate().fadeIn(duration: const Duration(milliseconds: 800)),
+    );
+  }
+
+  AppBar appBar(item){
+    final provider = ref.read(deliveriesViewModelProvider.notifier);
+    return AppBar(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TextView(
+            text: 'Tracking “${item.trackingId}”',
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+          PopupMenuButton(itemBuilder: (context) {
+            return [
+              PopupMenuItem(
+                child: const Text('Pending'),
+                onTap: () {
+                  provider.updateList(widget.id, 'Pending').whenComplete(() {
+                    fetchDetails();
+                    print('pending');
+                  });
+                },
+              ),
+              PopupMenuItem(
+                child: const Text('In Transit'),
+                onTap: () {
+                  provider.updateList(widget.id, 'In Transit').whenComplete(() {
+                    fetchDetails();
+                    print('In Transit');
+                  });
+                },
+              ),
+              PopupMenuItem(
+                child: const Text('Delivered'),
+                onTap: () {
+                  provider
+                      .updateList(widget.id, 'Accepted')
+                      .whenComplete(() {
+                    fetchDetails();
+                    print('created');
+                  });
+                },
+              ),
+            ];
+          })
         ],
       ),
     );

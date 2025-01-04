@@ -22,12 +22,12 @@ class DeliveryResponseModel {
   String? senderPhone;
   String? recipientName;
   String? recipientPhone;
-  // List<DeliveryItem>? deliveryItems;
+  List<DeliveryItem>? deliveryItems;
   int? totalItemsCost;
   int? totalItemWeight;
   int? deliveryCost;
   String? paymentType;
-  // DateTime? scheduleDelivery;
+  DateTime? scheduleDelivery;
   String? trackingId;
   String? paymentMethod;
   int? cashCollected;
@@ -54,12 +54,12 @@ class DeliveryResponseModel {
     this.senderPhone,
     this.recipientName,
     this.recipientPhone,
-    // this.deliveryItems,
+    this.deliveryItems,
     this.totalItemsCost,
     this.totalItemWeight,
     this.deliveryCost,
     this.paymentType,
-    // this.scheduleDelivery,
+    this.scheduleDelivery,
     this.trackingId,
     this.paymentMethod,
     this.cashCollected,
@@ -87,19 +87,19 @@ class DeliveryResponseModel {
     senderPhone = json['sender_phone'];
     recipientName = json['recipient_name'];
     recipientPhone = json['recipient_phone'];
-    // if (json['delivery_items'] != null) {
-    //   deliveryItems = <DeliveryItem>[];
-    //   json['delivery_items'].forEach((v) {
-    //     deliveryItems!.add(DeliveryItem.fromJson(v));
-    //   });
-    // }
+    if (json['delivery_items'] != null) {
+      deliveryItems = <DeliveryItem>[];
+      json['delivery_items'].forEach((v) {
+        deliveryItems!.add(DeliveryItem.fromJson(v));
+      });
+    }
     totalItemsCost = json['total_items_cost'];
     totalItemWeight = json['total_item_weight'];
     deliveryCost = json['delivery_cost'];
     paymentType = json['payment_type'];
-    // scheduleDelivery = json['schedule_delivery'] != null
-    //     ? DateTime.parse(json['schedule_delivery'])
-    //     : null;
+    scheduleDelivery = json['schedule_delivery'] != null
+        ? DateTime.parse(json['schedule_delivery'])
+        : null;
     trackingId = json['tracking_id'];
     paymentMethod = json['payment_method'];
     cashCollected = json['cash_collected'];
@@ -128,14 +128,14 @@ class DeliveryResponseModel {
     data['sender_phone'] = senderPhone;
     data['recipient_name'] = recipientName;
     data['recipient_phone'] = recipientPhone;
-    // if (deliveryItems != null) {
-    //   data['delivery_items'] = deliveryItems!.map((v) => v.toJson()).toList();
-    // }
+    if (deliveryItems != null) {
+      data['delivery_items'] = deliveryItems!.map((v) => v.toJson()).toList();
+    }
     data['total_items_cost'] = totalItemsCost;
     data['total_item_weight'] = totalItemWeight;
     data['delivery_cost'] = deliveryCost;
     data['payment_type'] = paymentType;
-    // data['schedule_delivery'] = scheduleDelivery?.toIso8601String();
+    data['schedule_delivery'] = scheduleDelivery?.toIso8601String();
     data['tracking_id'] = trackingId;
     data['payment_method'] = paymentMethod;
     data['cash_collected'] = cashCollected;
