@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
 import 'package:renda_assessment/providers/deliveries_view_model.dart';
 import 'package:renda_assessment/res/app_assets.dart';
 import 'package:renda_assessment/res/constants/app_colors.dart';
@@ -37,16 +38,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       setState(() {});
     });
   }
-/// CALL MODAL BOTTOM SHEET
-  void showSheet(String id) {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return ShowBottomSheet(
-            id: id,
-          );
-        });
-  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -58,15 +51,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ? ErrorPlaceholder(
         onRetryPress: provider.fetchDeliveries,
       )
-          :  Skeletonizer(
-        enabled: stateProvider.isLoading,
-        child: Column(
-          children: [
-            _buildHeader(),
-            _deliveryList()
-          ],
-        ).animate().fadeIn(duration: const Duration(milliseconds: 800)),
-      ),
+          :  SmartRefresher(
+        enablePullDown: true,
+        enablePullUp: false,
+        controller: provider.refreshController,
+        onRefresh: provider.onRefresh,
+            child: Skeletonizer(
+                    enabled: stateProvider.isLoading,
+                    child: Column(
+            children: [
+              _buildHeader(),
+              _deliveryList()
+            ],
+                    ).animate().fadeIn(duration: const Duration(milliseconds: 800)),
+                  ),
+          ),
     );
   }
   /// header widget Including the search input field
@@ -171,7 +170,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final val = provider.searchList[index];
             if (provider.searchList.isNotEmpty) {
               return  GestureDetector(
-                onTap: () =>showSheet(val.id ?? ''),
+                onTap: () =>provider.showSheet(val.id ?? '',context),
                 child: Container(
                   height: MediaQuery.of(context).size.height * .07,
                   width: MediaQuery.of(context).size.width,
@@ -233,7 +232,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             }
           },
           separatorBuilder: (_, index) => const Gap(10),
-          itemCount: provider.searchList.length): Center(child: TextView(text: 'No delivery item was found',fontSize: 16,fontWeight: FontWeight.w600,),),
+          itemCount: provider.searchList.length): const Center(child: TextView(text: 'No delivery item was found',fontSize: 16,fontWeight: FontWeight.w600,),),
     ) ;
   }
 }

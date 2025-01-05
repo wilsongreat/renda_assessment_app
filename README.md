@@ -21,6 +21,7 @@ dotted_line
 flutter_screenutil for managing media queries in a detailed way
 skeletonizer: for managing loading state on the pages to give the pages a smooth transition once the data is fetched 
 http: Future-based library for making HTTP client requests
+pull to refresh: for re-fetching data from apis
 
 
 📂 PROJECT STRUCTURE
@@ -38,6 +39,7 @@ lib/
 ADDITIONAL FEATURES
 - the app handles bad network connection by popping up a dialogue that prompts user about the network 
   issue and provides user with a button to retry connection
+- Pull to refresh to recall the apis and update data on the home screen 
 
 STEPS AND FUNCTIONS
 - 

@@ -3,7 +3,9 @@ import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
 import 'package:renda_assessment/model/deliveries_model.dart';
+import 'package:renda_assessment/presentation/components/home_page_bottom_sheet.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -105,6 +107,27 @@ class DeliveriesViewModel extends _$DeliveriesViewModel {
       ..add(val.deliveryItems!.first.weight!.toString())
       ..add(val.deliveryItems!.first.weight!.toString());
     prefs.setStringList(val.id ?? '', list);
+  }
+
+  /// Controller for pull-to-refresh functionality
+  final RefreshController refreshController = RefreshController(initialRefresh: false);
+  void onRefresh() async{
+    // monitor network fetch
+    await Future.delayed(const Duration(milliseconds: 1000),(){
+      fetchDeliveries();
+    });
+    refreshController.refreshCompleted();
+  }
+
+  /// CALL MODAL BOTTOM SHEET
+  void showSheet(String id,BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return ShowBottomSheet(
+            id: id,
+          );
+        });
   }
 }
 
