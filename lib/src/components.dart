@@ -3,3 +3,4 @@ export 'package:renda_assessment/presentation/components/shared/custom_input.dar
 export 'package:renda_assessment/presentation/components/shared/custom_text.dart';
 export 'package:renda_assessment/presentation/components/shared/error_placeholder.dart';
 export 'package:renda_assessment/presentation/components/shared/gap.dart';
+export 'package:renda_assessment/presentation/components/home_page_bottom_sheet.dart';

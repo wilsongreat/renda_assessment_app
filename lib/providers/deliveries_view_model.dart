@@ -23,6 +23,8 @@ class DeliveriesViewModel extends _$DeliveriesViewModel {
 
   List<DeliveryResponseModel> searchList = [];
 
+  ///SEARCH DELIVERIES LIST
+
   Future<void> searchDeliveries(String search) async {
     if(search.isNotEmpty){
       searchList = deliveryList.where((element) {
@@ -38,15 +40,14 @@ class DeliveriesViewModel extends _$DeliveriesViewModel {
     print(searchList.length);
   }
 
+
+  ///FETCH DELIVERIES LIST from api call
   Future<void> fetchDeliveries() async {
     debugPrint(url);
 
     // Show loading state
     state = const AsyncLoading();
-
     // Fetch and parse deliveries
-
-
       state = await AsyncValue.guard(()async{
         final response = await http.get(Uri.parse(url));
         if (response.statusCode == 200) {
@@ -87,7 +88,7 @@ class DeliveriesViewModel extends _$DeliveriesViewModel {
     // });
     return;
   }
-
+  ///UPDATE DELIVERY DATA
   Future<void> updateList(String id, String status) async {
     final val = deliveryList.firstWhere((element) => element.id == id);
 

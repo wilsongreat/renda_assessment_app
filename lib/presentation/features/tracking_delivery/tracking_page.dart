@@ -2,6 +2,7 @@ import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:renda_assessment/providers/deliveries_view_model.dart';
 import 'package:renda_assessment/res/app_assets.dart';
@@ -30,6 +31,7 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
     super.initState();
   }
 
+/// locally fetch delivery Details
   Future<void> fetchDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _delivers = prefs.getStringList(widget.id) ?? [];
@@ -100,7 +102,7 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               TextView(
-                                text: _delivers[2]== 'In Transit'? 'Your parcel is on the way':_delivers[2]== 'Accepted'?'Your parcel has been delivered': 'Your parcel is pending delivery',
+                                text:_delivers.length < 2 ? '': _delivers[2] == 'In Transit'? 'Your parcel is on the way':_delivers[2]== 'Accepted'?'Your parcel has been delivered': 'Your parcel is pending delivery',
                                 fontSize: 20,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -204,7 +206,7 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
                                         size: 15,
                                       ),
                                       mainText: 'Successfully Delivered',
-                                      subText: 'December | 09:10 AM ',
+                                      subText: formatSystemDate(item.scheduleDelivery!.toLocal()),
                                       length: 60),
                                   trackStep(
                                       color: _delivers.isEmpty
@@ -273,6 +275,7 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
     );
   }
 
+  /// App bar widget
   AppBar appBar(item){
     final provider = ref.read(deliveriesViewModelProvider.notifier);
     return AppBar(
@@ -284,44 +287,48 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
-          PopupMenuButton(itemBuilder: (context) {
-            return [
-              PopupMenuItem(
-                child: const Text('Pending'),
-                onTap: () {
-                  provider.updateList(widget.id, 'Pending').whenComplete(() {
-                    fetchDetails();
-                    print('pending');
-                  });
-                },
-              ),
-              PopupMenuItem(
-                child: const Text('In Transit'),
-                onTap: () {
-                  provider.updateList(widget.id, 'In Transit').whenComplete(() {
-                    fetchDetails();
-                    print('In Transit');
-                  });
-                },
-              ),
-              PopupMenuItem(
-                child: const Text('Delivered'),
-                onTap: () {
-                  provider
-                      .updateList(widget.id, 'Accepted')
-                      .whenComplete(() {
-                    fetchDetails();
-                    print('created');
-                  });
-                },
-              ),
-            ];
-          })
+          SizedBox(
+            width: 40.w,
+            child: PopupMenuButton(itemBuilder: (context) {
+              return [
+                PopupMenuItem(
+                  child: const Text('Pending'),
+                  onTap: () {
+                    provider.updateList(widget.id, 'Pending').whenComplete(() {
+                      fetchDetails();
+                      print('pending');
+                    });
+                  },
+                ),
+                PopupMenuItem(
+                  child: const Text('In Transit'),
+                  onTap: () {
+                    provider.updateList(widget.id, 'In Transit').whenComplete(() {
+                      fetchDetails();
+                      print('In Transit');
+                    });
+                  },
+                ),
+                PopupMenuItem(
+                  child: const Text('Delivered'),
+                  onTap: () {
+                    provider
+                        .updateList(widget.id, 'Accepted')
+                        .whenComplete(() {
+                      fetchDetails();
+                      print('created');
+                    });
+                  },
+                ),
+              ];
+            }),
+          )
         ],
       ),
     );
   }
 
+  ///delivery track widget for displaying delivery details
   Widget trackStep(
       {color,
       icon,

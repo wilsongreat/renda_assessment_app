@@ -43,13 +43,12 @@ dependencies:
   dotted_line: ^3.2.3
   flutter_screenutil: ^5.9.3
   skeletonizer: ^1.4.2
-  pull_to_refresh_flutter3: ^2.0.2
   http: ^1.0.0
   logger: ^1.1.0
   percent_indicator: ^4.2.4
   shared_preferences: ^2.3.5
   get_it: ^8.0.3
-  showcaseview: ^3.0.0
+  intl: ^0.20.1
 
 dev_dependencies:
   flutter_test:

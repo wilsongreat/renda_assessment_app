@@ -381,6 +381,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  intl:
+    dependency: "direct main"
+    description:
+      name: intl
+      sha256: "00f33b908655e606b86d2ade4710a231b802eec6f11e87e4ea3783fd72077a50"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.20.1"
   io:
     dependency: transitive
     description:
@@ -621,14 +629,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-  pull_to_refresh_flutter3:
-    dependency: "direct main"
-    description:
-      name: pull_to_refresh_flutter3
-      sha256: "37a88d901cca9a46dbdd46523de8e7b35a3e58634a0e775b1a5904981f69b353"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.2"
   riverpod:
     dependency: transitive
     description:
@@ -733,14 +733,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
-  showcaseview:
-    dependency: "direct main"
-    description:
-      name: showcaseview
-      sha256: f236c1f44b286e1ba888f8701adca067af92c33e29ea937d0fe9b4a29d4cd41e
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   skeletonizer:
     dependency: "direct main"
     description:
